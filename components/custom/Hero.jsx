@@ -1,6 +1,6 @@
 "use client";
 import { MessagesContext } from "@/context/MessagesContext";
-import { UserDetailContext } from "@/context/UserdetailContext";
+import { UserDetailContext } from "@/context/UserDetailContext.jsx";
 import Lookup from "@/data/Lookup";
 import { ArrowRight, Link } from "lucide-react";
 import React, { useContext, useState } from "react";
@@ -57,7 +57,10 @@ const Hero = () => {
           </h2>
         ))}
       </div>
-      <SignInDialog openDialog={openDialog} closeDialog={(v) => setOpenDialog(v)} />
+      <SignInDialog
+        openDialog={openDialog}
+        closeDialog={(v) => setOpenDialog(v)}
+      />
     </div>
   );
 };

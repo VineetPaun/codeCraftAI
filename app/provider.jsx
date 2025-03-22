@@ -6,6 +6,7 @@ import { UserDetailContext } from "@/context/UserDetailContext.jsx";
 import Header from "@/components/custom/Header";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useConvex } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 const Provider = ({ children }) => {
   const [messages, setMessages] = useState();

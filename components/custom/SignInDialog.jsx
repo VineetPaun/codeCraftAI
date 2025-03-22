@@ -12,12 +12,16 @@ import Lookup from "@/data/Lookup";
 import { Button } from "../ui/button";
 import { UserDetailContext } from "@/context/UserDetailContext.jsx";
 import { useGoogleLogin } from "@react-oauth/google";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { v4 as uuid4 } from "uuid";
 
 const SignInDialog = ({ openDialog, closeDialog }) => {
   const contextValue = useContext(UserDetailContext) ?? {
     userDetail: null,
     setUserDetail: () => {},
   };
+  const CreateUser = useMutation(api.users.CreateUser);
   const { userDetail, setUserDetail } = contextValue;
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -28,6 +32,16 @@ const SignInDialog = ({ openDialog, closeDialog }) => {
       );
 
       console.log(userInfo);
+      const user = userInfo.data;
+      await CreateUser({
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        uid: uuid4(),
+      });
+      if (typeof window !== undefined) {
+        localStorage.setItem("user", JSON.stringify(user));
+      }
       setUserDetail(userInfo?.data);
       closeDialog(false);
     },

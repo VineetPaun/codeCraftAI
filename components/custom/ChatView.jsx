@@ -11,6 +11,7 @@ import { ArrowRight, Link, Loader2Icon } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 const ChatView = () => {
   const { id } = useParams();
@@ -40,9 +41,9 @@ const ChatView = () => {
     });
     console.log(result.data.result);
     const aiResp = {
-        role: 'ai',
-        content: result.data.result
-    }
+      role: "ai",
+      content: result.data.result,
+    };
     setMessages((prev) => [
       ...prev,
       {
@@ -51,9 +52,9 @@ const ChatView = () => {
       },
     ]);
     await UpdateMessages({
-     messages: [...messages, aiResp],
+      messages: [...messages, aiResp],
       workspaceId: id,
-    })
+    });
     setLoading(false);
   };
   useEffect(() => {
@@ -83,12 +84,12 @@ const ChatView = () => {
 
   return (
     <div className="relative h-[85vh] flex flex-col">
-      <div 
-        className="flex-1 overflow-y-scroll scrollbar-hide" 
-        style={{ 
-          msOverflowStyle: 'none', 
-          scrollbarWidth: 'none', 
-          WebkitOverflowScrolling: 'touch' 
+      <div
+        className="flex-1 overflow-y-scroll scrollbar-hide"
+        style={{
+          msOverflowStyle: "none",
+          scrollbarWidth: "none",
+          WebkitOverflowScrolling: "touch",
         }}>
         {messageArray.map((msg, index) => (
           <div
@@ -104,7 +105,14 @@ const ChatView = () => {
                 className="rounded-full"
               />
             )}
-            <h2>{msg.context}</h2>
+            <ReactMarkdown
+              components={{
+                p: ({ node, ...props }) => (
+                  <p className="flex flex-col" {...props} />
+                ),
+              }}>
+              {msg.context}
+            </ReactMarkdown>
           </div>
         ))}
         {loading && (

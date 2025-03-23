@@ -11,24 +11,28 @@ import { api } from "@/convex/_generated/api";
 const Provider = ({ children }) => {
   const [messages, setMessages] = useState();
   const [userDetail, setUserDetail] = useState();
-  const convex = useConvex()
+  const convex = useConvex();
 
   useEffect(() => {
-    isAuthenticated()
-  }, [])
+    isAuthenticated();
+  }, []);
 
   const isAuthenticated = async () => {
-    if(typeof window !== undefined) {
-      const user = JSON.parse(localStorage.getItem('user'))
-      const result = await convex.query(api.users.GetUser, {
-        email: user?.email
-      })
-      setUserDetail(result)
-      console.log(result);
+    if (typeof window !== undefined) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user) {
+        const result = await convex.query(api.users.GetUser, {
+          email: user?.email,
+        });
+        // Merge the database result with Google profile data to ensure the picture URL is preserved
+        setUserDetail({ ...result, ...user });
+        console.log("User data:", { ...result, ...user });
+      }
     }
-  }
+  };
   return (
-    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID_KEY}>
+    <GoogleOAuthProvider
+      clientId={process.env.NEXT_PUBLIC_GOOGLE_AUTH_CLIENT_ID_KEY}>
       <UserDetailContext.Provider value={{ userDetail, setUserDetail }}>
         <MessagesContext.Provider value={{ messages, setMessages }}>
           <NextThemeProvider

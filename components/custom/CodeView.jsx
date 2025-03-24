@@ -17,17 +17,17 @@ import { api } from "@/convex/_generated/api";
 import { useParams } from "next/navigation";
 import { Loader2Icon } from "lucide-react";
 
-// Component to track file changes and persist them
-const FileChangeTracker = ({ setFiles }) => {
-  const { sandpack } = useSandpack();
-  const { files: sandpackFiles, activeFile } = sandpack;
-  const prevFilesRef = useRef(sandpackFiles);
+const CodeView = () => {
   const { messages, setMessages } = useContext(MessagesContext);
   const UpdateFiles = useMutation(api.workspace.UpdateFiles);
-  const id = useParams();
+  const {id} = useParams();
   const convex = useConvex();
+  const sandpackRef = useRef(null);
+  const prevFilesRef = useRef(null);
+  const [activeTab, setActiveTab] = useState("code");
   const [loading, setLoading] = useState(false);
-
+  const [files, setFiles] = useState(Lookup?.DEFAULT_FILE);
+  
   useEffect(() => {
     id && GetFiles();
   }, [id]);
@@ -42,6 +42,7 @@ const FileChangeTracker = ({ setFiles }) => {
     setLoading(false);
   };
 
+  // Generate AI code based on messages
   const GenerateAICode = async () => {
     setLoading(true);
     const PROMPT = JSON.stringify(messages) + " " + Prompt.CODE_GEN_PROMPT;
@@ -59,6 +60,7 @@ const FileChangeTracker = ({ setFiles }) => {
     setLoading(false);
   };
 
+  // Generate code when user sends a message
   useEffect(() => {
     if (messages?.length > 0) {
       const role = messages[messages?.length - 1]?.role;
@@ -68,54 +70,39 @@ const FileChangeTracker = ({ setFiles }) => {
     }
   }, [messages]);
 
-  useEffect(() => {
-    // This effect will run whenever sandpackFiles or activeFile changes
-    if (
-      JSON.stringify(prevFilesRef.current) !== JSON.stringify(sandpackFiles)
-    ) {
-      // Files have changed, update state and localStorage
-      setFiles(sandpackFiles);
+  // Track file changes and persist to localStorage
+  const FileChangeTracker = () => {
+    const { sandpack } = useSandpack();
+    const { files: sandpackFiles, activeFile } = sandpack;
 
-      // Store all files in localStorage
-      Object.keys(sandpackFiles).forEach((filePath) => {
-        const fileContent = sandpackFiles[filePath]?.code;
-        if (fileContent) {
-          localStorage.setItem(`sandpack-file-${filePath}`, fileContent);
-        }
-      });
+    useEffect(() => {
+      if (
+        prevFilesRef.current &&
+        JSON.stringify(prevFilesRef.current) !== JSON.stringify(sandpackFiles)
+      ) {
+        // Files have changed, update state and localStorage
+        setFiles(sandpackFiles);
 
-      prevFilesRef.current = sandpackFiles;
-    }
-  }, [sandpackFiles, activeFile, setFiles]);
+        // Store all files in localStorage
+        Object.keys(sandpackFiles).forEach((filePath) => {
+          const fileContent = sandpackFiles[filePath]?.code;
+          if (fileContent) {
+            localStorage.setItem(`sandpack-file-${filePath}`, fileContent);
+          }
+        });
 
-  return null; // This is a utility component, it doesn't render anything
-};
+        prevFilesRef.current = sandpackFiles;
+      }
+    }, [sandpackFiles, activeFile]);
 
-const CodeView = () => {
-  const [activeTab, setActiveTab] = useState("code");
-  const [loading, setLoading] = useState(false);
-  const [files, setFiles] = useState(() => {
-    // Initialize files from localStorage if available, otherwise use defaults
-    if (typeof window !== "undefined") {
-      const savedFiles = {};
-      let hasStoredFiles = false;
+    return null; // This is a utility component, it doesn't render anything
+  };
 
-      // Check if we have any stored files
-      Object.keys(Lookup?.DEFAULT_FILE || {}).forEach((filePath) => {
-        const storedContent = localStorage.getItem(`sandpack-file-${filePath}`);
-        if (storedContent) {
-          savedFiles[filePath] = { code: storedContent };
-          hasStoredFiles = true;
-        } else {
-          savedFiles[filePath] = Lookup?.DEFAULT_FILE[filePath];
-        }
-      });
-
-      return hasStoredFiles ? savedFiles : Lookup?.DEFAULT_FILE;
-    }
-
-    return Lookup?.DEFAULT_FILE;
-  });
+  // Store sandpack reference when it's available
+  // const handleSandpackReady = (sandpack) => {
+  //   sandpackRef.current = { sandpack };
+  //   prevFilesRef.current = sandpack.files;
+  // };
   return (
     <div className="relative">
       <div className="bg-[#181818] w-full p-2 border">
@@ -146,12 +133,7 @@ const CodeView = () => {
             "https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio",
           ],
         }}>
-        {/* FileChangeTracker component to persist file changes */}
-        <FileChangeTracker
-          setFiles={setFiles}
-          loading={loading}
-          setLoading={setLoading}
-        />
+        <FileChangeTracker />
         <SandpackLayout>
           {activeTab == "code" ? (
             <>
@@ -168,12 +150,12 @@ const CodeView = () => {
           )}
         </SandpackLayout>
       </SandpackProvider>
-      {loading && (
+      {loading &&
         <div className="p-10 bg-gray-900 opacity-65 absolute top-0 rounded-lg w-full h-full flex items-center justify-center">
           <Loader2Icon className="animate-spin h-10 w-10 text-white" />
           <h2>Generating your files...</h2>
         </div>
-      )}
+      }
     </div>
   );
 };

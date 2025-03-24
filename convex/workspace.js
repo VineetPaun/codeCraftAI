@@ -17,11 +17,12 @@ export const CreateWorkspace = mutation({
 
 export const GetWorkspace = query({
     args: {
-        workspaceId: v.id('workspace')
+        workspaceId: v.union(v.id('workspace'), v.object({ id: v.id('workspace') }))
     },
     handler: async (ctx, args) => {
-        const result = await ctx.db.get(args.workspaceId)
-        return result
+        const id = typeof args.workspaceId === 'string' ? args.workspaceId : args.workspaceId.id;
+        const result = await ctx.db.get(id);
+        return result;
     }
 })
 
@@ -37,3 +38,25 @@ export const UpdateMessages = mutation({
         return result
     }
 })
+
+export const UpdateFiles = mutation({
+    args: {
+        workspaceId: v.union(v.id('workspace'), v.object({ id: v.id('workspace') })),
+        files: v.optional(v.any())
+    },
+    handler: async (ctx, args) => {
+        // Extract the ID whether it's a string or object
+        const id = typeof args.workspaceId === 'string' ? args.workspaceId : args.workspaceId.id;
+
+        // Validate that the workspace exists before updating
+        const workspace = await ctx.db.get(id);
+        if (!workspace) {
+            throw new Error('Workspace not found');
+        }
+
+        const result = await ctx.db.patch(id, {
+            files: args.files
+        });
+        return result;
+    }
+});

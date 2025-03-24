@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   SandpackProvider,
   SandpackLayout,
@@ -9,12 +9,36 @@ import {
   useSandpack,
 } from "@codesandbox/sandpack-react";
 import Lookup from "@/data/Lookup";
+import axios from "axios";
+import { MessagesContext } from "@/context/MessagesContext";
+import Prompt from "@/data/Prompt";
 
 // Component to track file changes and persist them
 const FileChangeTracker = ({ setFiles }) => {
   const { sandpack } = useSandpack();
   const { files: sandpackFiles, activeFile } = sandpack;
   const prevFilesRef = useRef(sandpackFiles);
+  const {messages, setMessages} = useContext(MessagesContext)
+  
+  const GenerateAICode = async () => {
+    const PROMPT = messages[messages?.length - 1]?.content + " " + Prompt.CODE_GEN_PROMPT
+    const result = await axios.post('/api/gen-ai-code', {
+      prompt: PROMPT
+    })
+    console.log(result.data);
+    const aiResp = result.data
+    const mergedFiles = {...Lookup.DEFAULT_FILE, ...aiResp?.files}
+    setFiles(mergedFiles)
+  }
+
+  useEffect(() => {
+    if (messages?.length > 0) {
+      const role = messages[messages?.length - 1]?.role;
+      if (role == "user") {
+        GenerateAICode();
+      }
+    }
+  }, [messages]);
 
   useEffect(() => {
     // This effect will run whenever sandpackFiles or activeFile changes

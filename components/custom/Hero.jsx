@@ -1,6 +1,6 @@
 "use client";
 import { MessagesContext } from "@/context/MessagesContext";
-import { UserDetailContext } from "@/context/UserDetailContext.jsx";
+import { UserDetailContext } from "@/context/UserDetailContext";
 import Lookup from "@/data/Lookup";
 import { ArrowRight, Link } from "lucide-react";
 import React, { useContext, useState } from "react";
@@ -18,8 +18,8 @@ const Hero = () => {
   };
   const { userDetail, setUserDetail } = contextValue;
   const [openDialog, setOpenDialog] = useState(false);
-  const CreateWorkspace = useMutation(api.workspace.CreateWorkspace)
-  const router = useRouter()
+  const CreateWorkspace = useMutation(api.workspace.CreateWorkspace);
+  const router = useRouter();
   const onGenerate = async (input) => {
     if (!userDetail?.name) {
       setOpenDialog(true);
@@ -28,14 +28,14 @@ const Hero = () => {
     const msg = {
       role: "user",
       context: input,
-    }
+    };
     setMessages(msg);
     const workspaceId = await CreateWorkspace({
       user: userDetail._id,
-      messages: [msg]
-    })
+      messages: [msg],
+    });
     console.log(workspaceId);
-    router.push('/workspace/' + workspaceId)
+    router.push("/workspace/" + workspaceId);
   };
   return (
     <div className="flex flex-col items-center mt-36 xl:mt-42 gap-2">

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import Lookup from "@/data/Lookup";
 import { Button } from "../ui/button";
-import { UserDetailContext } from "@/context/UserDetailContext.jsx";
+import { UserDetailContext } from "@/context/UserDetailContext";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";

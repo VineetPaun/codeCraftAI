@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { ThemeProvider as NextThemeProvider } from "next-themes";
 import { MessagesContext } from "@/context/MessagesContext";
-import { UserDetailContext } from "@/context/UserDetailContext.jsx";
+import { UserDetailContext } from "@/context/UserDetailContext";
 import Header from "@/components/custom/Header";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useConvex } from "convex/react";
